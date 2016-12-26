@@ -1,11 +1,6 @@
----
-title: "Reproducible Research: Analyzing FitBit Data"
-author: "Amir Hamzah Khalid"
-date: " December, 2016"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Analyzing FitBit Data
+Amir Hamzah Khalid  
+ December, 2016  
 
 ###About
 This was the first project for the **Reproducible Research** course in Coursera's Data Science specialization track. The purpose of the project was to answer a series of questions using data collected from a [FitBit](http://en.wikipedia.org/wiki/Fitbit).
@@ -38,14 +33,34 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 ## Loading and preprocessing the data
 Download, unzip and load data into data frame `data`.
 
-```{r}
+
+```r
 # Clean up workspace
 rm(list = ls(all = TRUE))
 
 library(graphics)   # load R Graphic packages
 library(grDevices)  # load R Graphic Devices and Support for Colours and Fonts
 library(dplyr)
+```
 
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 # Set working directory
   setwd('~/Documents/Study/Data Science Specialization Course/5 Reproducible Research/Project1/')
   
@@ -61,17 +76,28 @@ library(dplyr)
   }
   activityRawData <- read.csv("activity.csv", stringsAsFactors = FALSE)
   dim(activityRawData)
-  
+```
+
+```
+## [1] 17568     3
+```
+
+```r
   # Code for preprocessing the data (Removing NAs):
   noNAActivityData <- activityRawData[complete.cases(activityRawData), ]
   dim(noNAActivityData)
+```
+
+```
+## [1] 15264     3
 ```
 
 
 ## What is mean total number of steps taken per day?
 Histogram of the total number of steps taken each day answer:
 
-```{r}
+
+```r
 library(ggplot2)    # load R package to Create Elegant Data Visulaisations Using the Grammar of Graphics
 # Histogram of the total number of steps taken each day
   ggplot(noNAActivityData, aes(as.factor(date),steps)) + 
@@ -80,20 +106,34 @@ library(ggplot2)    # load R package to Create Elegant Data Visulaisations Using
     ylab("Steps") + 
     ggtitle("Histogram of the total number of steps taken each day") + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 # Mean number of steps taken each day
   meanFreq <- as.integer(mean(aggregate(steps~date, noNAActivityData, FUN = sum)$steps))
   meanFreq
+```
 
+```
+## [1] 10766
+```
+
+```r
 # Median number of steps taken each day
   medianFreq <- median(aggregate(steps~date, noNAActivityData, FUN = sum)$steps)
   medianFreq
+```
 
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 The average daily activity pattern answer:
-```{r}
+
+```r
 # Average daily activity pattern?
   q2 <- noNAActivityData
   q2 <- aggregate(steps~interval, q2, FUN = mean)
@@ -101,22 +141,38 @@ The average daily activity pattern answer:
        type = "l", 
        xlab = "Date", 
        ylab = "Average Steps per Day (5-mins interval)")
-  
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 # Code to look for the maximum number of steps:
   maxSteps <- q2[q2$steps == max(q2$steps), ]
   q2 <- NULL
   maxSteps
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 The 5-minute interval 835, on average across all the days in the dataset, contains the maximum number of steps (206.1698113).
 
 ## Imputing missing values
 Imputing missing values answer:
 Code to calculate the total number of missing values in the dataset.
-```{r}
+
+```r
   # Calculate the total number of missing values in the dataset
   numNA <- nrow(activityRawData) - nrow(noNAActivityData)
   numNA
+```
 
+```
+## [1] 2304
+```
+
+```r
 # Used the average steps taken for that specific interval in all of the data set and assign it to the missing value(s)
   imputedData <- activityRawData
   #The mean for that 5-minute interval
@@ -134,60 +190,36 @@ Code to calculate the total number of missing values in the dataset.
     ylab("Steps") + 
     ggtitle("Histogram of the Total Number of Steps Taken Each Day (Imputed Data)") + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+```r
 # New mean of the imputed data
   newmeanFreq <- as.integer(mean(aggregate(steps~date,imputedData, FUN = sum)$steps))
   newmeanFreq
-  
+```
+
+```
+## [1] 10766
+```
+
+```r
 # New median of the imputed data  
   newmedianFreq <- as.integer(median(aggregate(steps~date,imputedData, FUN = sum)$steps))
   newmeanFreq
 ```
-The new mean of the imputed data is 10766 steps compared to the old mean of 10766 steps. It shows difference of 0 steps on average per day.
 
-The new median of the imputed data is 10766 steps compared to the old median of 10765 steps. It shows a difference of 1 steps for the median.
+```
+## [1] 10766
+```
+The new mean of the imputed data is 10766 steps compared to the old mean of 10766 steps. 
+That creates a difference of 0 steps on `average per day`.
+
+The new median of the imputed data is 10766 steps compared to the old median of 10765 steps. 
+That creates a difference of 1 steps for the `median`.
 
 This shows that the overall shape of the distribution has not changed after applying the method in imputing the data.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-Difference in activity patterns between weekdays and weekends answer:
-```{r}
-  # Create a new factor variable in the dataset with two levels - “weekday” and “weekend” 
-  # indicating whether a given date is a weekday or weekend day.
-    weekDayEnd <- data.frame("dayType" = character(0))
-    weekDayEnd <- NULL
-  
-  # Check wether the day is a weekday or weekend (Saturday)
-    weekInd <- function(day){
-      if (weekdays(day) == "Saturday") {
-        out <- "Weekend" 
-      } else {
-        out <- "Weekday" 
-      }
-      out
-    }
-    
-    for (i in 1:nrow(imputedData)){
-      date <- imputedData[i,c("date")]
-      newObs <- data.frame("dayType" = weekInd(as.Date(date)))
-      weekDayEnd <- rbind(weekDayEnd, newObs)
-    }
-  
-  #------------------------------------------------------------
-  # Add the day type column in the data set
-    imputedData <- cbind(imputedData, weekDayEnd)
-```
-
-Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends.
-```{r}
-  # Plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends.
-    averageWeekDayEnd <- aggregate(steps~interval + dayType, imputedData, FUN = mean)
-    ggplot(averageWeekDayEnd, aes(interval,steps, color = dayType)) + 
-      geom_line() + 
-      facet_wrap(~dayType, ncol = 1) + 
-      xlab("5-min Interval") + 
-      ylab("Steps") + 
-      guides(fill = FALSE)
-```
-
